@@ -1,0 +1,19 @@
+{
+  // Pythonファイルの設定
+  "[python]": {
+    // デフォルトのフォーマッタをRuffに設定
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    // ファイル保存時に自動的にフォーマット
+    "editor.formatOnSave": true,
+    // 行の折り返し設定（79文字）
+    "editor.rulers": [79],
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 79
+  },
+
+  // 一般的なエディタ設定
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}

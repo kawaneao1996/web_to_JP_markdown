@@ -1,0 +1,7 @@
+# filepath: /home/kawane/develop/web_to_JP_markdown/requirements.txt
+types-requests==2.31.0
+beautifulsoup4==4.12.2
+google-genai
+markdownify==0.11.6
+argparse==1.4.0
+ruff==0.3.0
