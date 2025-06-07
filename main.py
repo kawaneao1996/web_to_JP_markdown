@@ -104,18 +104,19 @@ class WebToMarkdownTranslator:
 
     def translate_to_japanese(self, content: str) -> str:
         """
-        コンテンツを日本語に翻訳
+        マークダウンコンテンツを日本語に翻訳
 
         Args:
-            content: 翻訳するコンテンツ
+            content: 翻訳するマークダウンコンテンツ
 
         Returns:
-            日本語に翻訳されたコンテンツ
+            日本語に翻訳されたマークダウンコンテンツ
         """
         prompt = f"""
-以下のHTMLコンテンツを日本語に翻訳してください。
-HTMLタグは保持し、テキスト部分のみを自然な日本語に翻訳してください。
+以下のマークダウンコンテンツを日本語に翻訳してください。
+マークダウンの書式（#、*、[]()など）は保持し、テキスト部分のみを自然な日本語に翻訳してください。
 技術的な用語や固有名詞は適切に日本語化してください。
+URLやコードブロックはそのまま保持してください。
 
 {content}
 """
@@ -155,15 +156,15 @@ HTMLタグは保持し、テキスト部分のみを自然な日本語に翻訳�
         print("主要コンテンツを抽出中...")
         main_content = self.extract_main_content(html_content)
 
-        print("日本語に翻訳中...")
-        translated_content = self.translate_to_japanese(main_content)
-
         print("マークダウンに変換中...")
-        markdown_content = self.html_to_markdown(translated_content)
+        markdown_content = self.html_to_markdown(main_content)
+
+        print("日本語に翻訳中...")
+        translated_content = self.translate_to_japanese(markdown_content)
 
         print(f"ファイルに出力中: {output_path}")
         with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(markdown_content)
+            f.write(translated_content)
 
         print("処理完了！")
 
