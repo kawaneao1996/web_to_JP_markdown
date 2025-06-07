@@ -5,7 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 - Setup: `pip install -r requirements.txt`
-- Run app: `python main.py -i "URL" -o "./output.md"`
+- Run CLI app: `python main.py -i "URL" -o "./output.md"`
+- Run Web app: `streamlit run app.py`
 
 ## Code Style Guidelines
 

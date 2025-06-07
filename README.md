@@ -16,8 +16,18 @@ Web の URL を入力するとその内容を日本語に翻訳し、マーク�
    pip install -r requirements.txt
    ```
 
-2. URL を引数にして実行
+2. アプリケーションを実行
+
+   ### CLI アプリ
 
    ```sh
-   main.py -i "URL" -o "./example.md"
+   python main.py -i "URL" -o "./example.md"
    ```
+
+   ### Web アプリ
+
+   ```sh
+   streamlit run app.py
+   ```
+
+   ブラウザで Web アプリが起動し、URL の入力、翻訳結果の表示、マークダウンファイルのダウンロードが可能です。
