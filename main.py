@@ -10,6 +10,7 @@ from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from google import genai
 from markdownify import markdownify as md  # type: ignore
 
@@ -136,7 +137,7 @@ URLやコードブロックはそのまま保持してください。
         Returns:
             マークダウン形式のテキスト
         """
-        return md(html, heading_style="ATX", bullets="-")
+        return md(html, heading_style="ATX", bullets="-")  # type: ignore
 
     def process_url(self, url: str, output_path: str) -> None:
         """
@@ -164,6 +165,22 @@ URLやコードブロックはそのまま保持してください。
 
         print("処理完了！")
 
+    def process_url_to_markdown(self, url: str) -> str:
+        """
+        URLを処理してマークダウン形式のコンテンツを返す
+
+        Args:
+            url: 処理するURL
+
+        Returns:
+            マークダウン形式のコンテンツ
+        """
+        html_content = self.fetch_web_content(url)
+        main_content = self.extract_main_content(html_content)
+        markdown_content = self.html_to_markdown(main_content)
+        translated_content = self.translate_to_japanese(markdown_content)
+        return translated_content
+
 
 def main():
     """メイン関数"""
@@ -189,4 +206,5 @@ def main():
 
 
 if __name__ == "__main__":
+    load_dotenv()
     main()
