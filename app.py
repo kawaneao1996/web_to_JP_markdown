@@ -5,7 +5,6 @@ Web記事を日本語に翻訳してマークダウン形式で表示・ダウ�
 """
 
 import os
-import tempfile
 from typing import Optional
 
 import streamlit as st
@@ -124,7 +123,10 @@ def main():
                         progress_bar.progress(75)
 
                         # 実際の処理
-                        translated_content = process_url(url, api_key or None)
+                        if url is not None:
+                            translated_content = process_url(str(url), api_key or None)
+                        else:
+                            raise ValueError("URLが入力されていません")
 
                         st.session_state.translated_content = translated_content
 
@@ -158,7 +160,7 @@ def main():
             # ダウンロードボタン
             st.markdown("### ダウンロード")
 
-            filename = get_filename_from_url(st.session_state.original_url)
+            filename = get_filename_from_url(str(st.session_state.original_url or ""))
 
             st.download_button(
                 label="📥 マークダウンファイルをダウンロード",
