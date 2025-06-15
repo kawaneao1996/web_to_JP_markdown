@@ -13,6 +13,8 @@ dependencies = [
     "markdownify",
     "mcp[cli]>=1.9.4",
     "httpx>=0.28.1",
+    "streamlit",
+    "google-genai",
 ]
 [tool.ruff]
 # 行の長さを79文字に制限
