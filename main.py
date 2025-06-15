@@ -25,7 +25,7 @@ class WebToMarkdownTranslator:
             api_key: Gemini APIキー（省略時は環境変数から取得）
         """
         if api_key is None:
-            api_key = os.getenv('GEMINI_API_KEY')
+            api_key = os.getenv("GEMINI_API_KEY")
 
         if not api_key:
             raise ValueError(
@@ -50,9 +50,8 @@ class WebToMarkdownTranslator:
         """
         try:
             headers = {
-                'User-Agent': (
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                    'AppleWebKit/537.36'
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
                 )
             }
             response = requests.get(url, headers=headers, timeout=30)
@@ -71,23 +70,21 @@ class WebToMarkdownTranslator:
         Returns:
             抽出されたテキストコンテンツ
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
 
         # 不要な要素を削除
-        for element in soup([
-            'script', 'style', 'nav', 'header', 'footer', 'aside'
-        ]):
+        for element in soup(["script", "style", "nav", "header", "footer", "aside"]):
             element.decompose()
 
         # 主要コンテンツの抽出を試行（優先順位順）
         main_selectors = [
-            'article',
-            'main',
+            "article",
+            "main",
             '[role="main"]',
-            '.content',
-            '.post-content',
-            '.entry-content',
-            '.article-content'
+            ".content",
+            ".post-content",
+            ".entry-content",
+            ".article-content",
         ]
 
         for selector in main_selectors:
@@ -96,7 +93,7 @@ class WebToMarkdownTranslator:
                 return str(main_content)
 
         # 見つからない場合はbodyを使用
-        body = soup.find('body')
+        body = soup.find("body")
         if body:
             return str(body)
 
@@ -123,8 +120,7 @@ URLやコードブロックはそのまま保持してください。
 
         try:
             response = self.client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt
+                model="gemini-2.0-flash", contents=prompt
             )
             return response.text or ""
         except Exception as e:
@@ -134,7 +130,7 @@ URLやコードブロックはそのまま保持してください。
         """
         HTMLをマークダウンに変換
 
-        Args:
+        Args:``
             html: HTMLコンテンツ
 
         Returns:
@@ -163,7 +159,7 @@ URLやコードブロックはそのまま保持してください。
         translated_content = self.translate_to_japanese(markdown_content)
 
         print(f"ファイルに出力中: {output_path}")
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(translated_content)
 
         print("処理完了！")
@@ -174,19 +170,12 @@ def main():
     parser = argparse.ArgumentParser(
         description="Web記事を日本語に翻訳してマークダウン形式で出力"
     )
+    parser.add_argument("-i", "--input", required=True, help="翻訳するWebページのURL")
     parser.add_argument(
-        '-i', '--input',
-        required=True,
-        help="翻訳するWebページのURL"
+        "-o", "--output", required=True, help="出力するマークダウンファイルのパス"
     )
     parser.add_argument(
-        '-o', '--output',
-        required=True,
-        help="出力するマークダウンファイルのパス"
-    )
-    parser.add_argument(
-        '--api-key',
-        help="Gemini APIキー（省略時は環境変数GEMINI_API_KEYを使用）"
+        "--api-key", help="Gemini APIキー（省略時は環境変数GEMINI_API_KEYを使用）"
     )
 
     args = parser.parse_args()

@@ -4,5 +4,5 @@ beautifulsoup4==4.12.2
 google-genai
 markdownify==0.11.6
 argparse==1.4.0
-ruff==0.3.0
+ruff==0.11.13
 streamlit==1.40.0
