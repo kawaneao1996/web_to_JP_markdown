@@ -148,15 +148,6 @@ def main():
             # マークダウン表示エリア
             st.markdown("### プレビュー")
 
-            # タブで表示切り替え
-            tab1, tab2 = st.tabs(["📖 レンダリング表示", "📝 マークダウン表示"])
-
-            with tab1:
-                st.markdown(st.session_state.translated_content)
-
-            with tab2:
-                st.code(st.session_state.translated_content, language="markdown")
-
             # ダウンロードボタン
             st.markdown("### ダウンロード")
 
@@ -171,6 +162,15 @@ def main():
 
             # ファイル情報表示
             st.info(f"📄 ファイル名: {filename}")
+
+            # タブで表示切り替え
+            tab1, tab2 = st.tabs(["📖 レンダリング表示", "📝 マークダウン表示"])
+
+            with tab1:
+                st.markdown(st.session_state.translated_content)
+
+            with tab2:
+                st.code(st.session_state.translated_content, language="markdown")
 
         else:
             st.info("👆 URLを入力して翻訳を実行してください")
