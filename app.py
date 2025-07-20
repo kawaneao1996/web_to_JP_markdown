@@ -18,8 +18,12 @@ def initialize_session_state():
         st.session_state.translated_content = ""
     if "original_url" not in st.session_state:
         st.session_state.original_url = ""
+    if "original_text" not in st.session_state:
+        st.session_state.original_text = ""
     if "processing" not in st.session_state:
         st.session_state.processing = False
+    if "input_source" not in st.session_state:
+        st.session_state.input_source = "url"
 
 
 def get_filename_from_url(url: str) -> str:
@@ -59,6 +63,17 @@ def process_url(url: str, api_key: Optional[str] = None) -> str:
         raise Exception(f"処理エラー: {str(e)}")
 
 
+def process_text(text: str, api_key: Optional[str] = None) -> str:
+    """テキストを処理してマークダウン内容を返す"""
+    try:
+        translator = WebToMarkdownTranslator(api_key=api_key)
+        translated_content = translator.translate_text_to_japanese(text)
+        return translated_content
+
+    except Exception as e:
+        raise Exception(f"処理エラー: {str(e)}")
+
+
 def main():
     """メイン関数"""
     st.set_page_config(
@@ -91,55 +106,105 @@ def main():
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.subheader("🌐 URL入力")
+        st.subheader("📝 入力方法を選択")
+        
+        # タブで入力方法を選択
+        tab1, tab2 = st.tabs(["🌐 URLから翻訳", "📄 テキストから翻訳"])
+        
+        with tab1:
+            # URL入力フォーム
+            url = st.text_input(
+                "翻訳したいWebページのURLを入力してください",
+                placeholder="https://example.com/article",
+                value=st.session_state.original_url,
+            )
 
-        # URL入力フォーム
-        url = st.text_input(
-            "翻訳したいWebページのURLを入力してください",
-            placeholder="https://example.com/article",
-            value=st.session_state.original_url,
-        )
+            # URL処理実行ボタン
+            if st.button("🔄 URL翻訳実行", disabled=not url or st.session_state.processing):
+                if not api_key and not os.getenv("GEMINI_API_KEY"):
+                    st.error("❌ Gemini APIキーを設定してください")
+                else:
+                    st.session_state.processing = True
+                    st.session_state.original_url = url
+                    st.session_state.input_source = "url"
 
-        # 処理実行ボタン
-        if st.button("🔄 翻訳実行", disabled=not url or st.session_state.processing):
-            if not api_key and not os.getenv("GEMINI_API_KEY"):
-                st.error("❌ Gemini APIキーを設定してください")
-            else:
-                st.session_state.processing = True
-                st.session_state.original_url = url
+                    with st.spinner("処理中..."):
+                        progress_bar = st.progress(0)
+                        status_text = st.empty()
 
-                with st.spinner("処理中..."):
-                    progress_bar = st.progress(0)
-                    status_text = st.empty()
+                        try:
+                            status_text.text("🌐 URLを取得中...")
+                            progress_bar.progress(25)
 
-                    try:
-                        status_text.text("🌐 URLを取得中...")
-                        progress_bar.progress(25)
+                            status_text.text("📄 コンテンツを抽出中...")
+                            progress_bar.progress(50)
 
-                        status_text.text("📄 コンテンツを抽出中...")
-                        progress_bar.progress(50)
+                            status_text.text("🈯 日本語に翻訳中...")
+                            progress_bar.progress(75)
 
-                        status_text.text("🈯 日本語に翻訳中...")
-                        progress_bar.progress(75)
+                            # 実際の処理
+                            if url is not None:
+                                translated_content = process_url(str(url), api_key or None)
+                            else:
+                                raise ValueError("URLが入力されていません")
 
-                        # 実際の処理
-                        if url is not None:
-                            translated_content = process_url(str(url), api_key or None)
-                        else:
-                            raise ValueError("URLが入力されていません")
+                            st.session_state.translated_content = translated_content
 
-                        st.session_state.translated_content = translated_content
+                            progress_bar.progress(100)
+                            status_text.text("✅ 処理完了！")
 
-                        progress_bar.progress(100)
-                        status_text.text("✅ 処理完了！")
+                            st.success("🎉 翻訳が完了しました！")
 
-                        st.success("🎉 翻訳が完了しました！")
+                        except Exception as e:
+                            st.error(f"❌ エラーが発生しました: {str(e)}")
 
-                    except Exception as e:
-                        st.error(f"❌ エラーが発生しました: {str(e)}")
+                        finally:
+                            st.session_state.processing = False
 
-                    finally:
-                        st.session_state.processing = False
+        with tab2:
+            # テキスト入力フォーム
+            text_input = st.text_area(
+                "翻訳したいマークダウンテキストを入力してください",
+                placeholder="# タイトル\n\nマークダウン形式のテキストをここに貼り付けてください...",
+                height=200,
+                value=st.session_state.original_text,
+            )
+
+            # テキスト処理実行ボタン
+            if st.button("🔄 テキスト翻訳実行", disabled=not text_input or st.session_state.processing):
+                if not api_key and not os.getenv("GEMINI_API_KEY"):
+                    st.error("❌ Gemini APIキーを設定してください")
+                else:
+                    st.session_state.processing = True
+                    st.session_state.original_text = text_input
+                    st.session_state.input_source = "text"
+
+                    with st.spinner("処理中..."):
+                        progress_bar = st.progress(0)
+                        status_text = st.empty()
+
+                        try:
+                            status_text.text("🈯 日本語に翻訳中...")
+                            progress_bar.progress(50)
+
+                            # 実際の処理
+                            if text_input is not None:
+                                translated_content = process_text(text_input, api_key or None)
+                            else:
+                                raise ValueError("テキストが入力されていません")
+
+                            st.session_state.translated_content = translated_content
+
+                            progress_bar.progress(100)
+                            status_text.text("✅ 処理完了！")
+
+                            st.success("🎉 翻訳が完了しました！")
+
+                        except Exception as e:
+                            st.error(f"❌ エラーが発生しました: {str(e)}")
+
+                        finally:
+                            st.session_state.processing = False
 
     with col2:
         st.subheader("📋 翻訳結果")
@@ -151,7 +216,14 @@ def main():
             # ダウンロードボタン
             st.markdown("### ダウンロード")
 
-            filename = get_filename_from_url(str(st.session_state.original_url or ""))
+            # ファイル名を入力ソースに基づいて生成
+            if st.session_state.input_source == "url" and st.session_state.original_url:
+                filename = get_filename_from_url(str(st.session_state.original_url))
+            else:
+                # テキスト入力の場合は汎用的なファイル名
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"translated_text_{timestamp}.md"
 
             st.download_button(
                 label="📥 マークダウンファイルをダウンロード",
@@ -173,13 +245,13 @@ def main():
                 st.code(st.session_state.translated_content, language="markdown")
 
         else:
-            st.info("👆 URLを入力して翻訳を実行してください")
+            st.info("👆 URLまたはテキストを入力して翻訳を実行してください")
 
     # フッター
     st.markdown("---")
     st.markdown(
-        "💡 **使い方**: URLを入力して翻訳実行ボタンを押すと、"
-        "Web記事が日本語に翻訳されてマークダウン形式で表示されます。"
+        "💡 **使い方**: URLまたはマークダウンテキストを入力して翻訳実行ボタンを押すと、"
+        "内容が日本語に翻訳されてマークダウン形式で表示されます。"
     )
 
 

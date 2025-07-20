@@ -182,15 +182,34 @@ URLやコードブロックはそのまま保持してください。
         translated_content = self.translate_to_japanese(markdown_content)
         return translated_content
 
+    def translate_text_to_japanese(self, text: str) -> str:
+        """
+        マークダウンテキストを直接日本語に翻訳
+
+        Args:
+            text: 翻訳するマークダウンテキスト
+
+        Returns:
+            日本語に翻訳されたマークダウンテキスト
+        """
+        return self.translate_to_japanese(text)
+
 
 def main():
     """メイン関数"""
     parser = argparse.ArgumentParser(
-        description="Web記事を日本語に翻訳してマークダウン形式で出力"
+        description="Web記事やテキストを日本語に翻訳してマークダウン形式で出力"
     )
-    parser.add_argument("-i", "--input", required=True, help="翻訳するWebページのURL")
+    parser.add_argument(
+        "-i", "--input", required=True,
+        help="翻訳するWebページのURLまたはテキストファイルのパス"
+    )
     parser.add_argument(
         "-o", "--output", required=True, help="出力するマークダウンファイルのパス"
+    )
+    parser.add_argument(
+        "--text", action="store_true",
+        help="入力をテキストファイルとして処理（URLではなく）"
     )
     parser.add_argument(
         "--api-key", help="Gemini APIキー（省略時は環境変数GEMINI_API_KEYを使用）"
@@ -200,7 +219,25 @@ def main():
 
     try:
         translator = WebToMarkdownTranslator(api_key=args.api_key)
-        translator.process_url(args.input, args.output)
+        
+        if args.text:
+            # テキストファイルを読み込んで翻訳
+            print(f"テキストファイルを読み込み中: {args.input}")
+            with open(args.input, "r", encoding="utf-8") as f:
+                text_content = f.read()
+            
+            print("日本語に翻訳中...")
+            translated_content = translator.translate_text_to_japanese(text_content)
+            
+            print(f"ファイルに出力中: {args.output}")
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write(translated_content)
+            
+            print("処理完了！")
+        else:
+            # URLから翻訳（従来の処理）
+            translator.process_url(args.input, args.output)
+            
     except Exception as e:
         print(f"エラー: {e}", file=sys.stderr)
         sys.exit(1)
